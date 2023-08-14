@@ -63,7 +63,6 @@ class Calendar:
         return [Event(
             start=datetime.strptime(e['start'].get('date'), GOOGLE_CALENDAR_ALL_DAY_EVENT_DATE),
             end=datetime.strptime(e['end'].get('date'), GOOGLE_CALENDAR_ALL_DAY_EVENT_DATE),
-            status=e.get('status')
         ) for e in self._get_all_day_events_only(events_result.get('items', []))]
 
     @staticmethod

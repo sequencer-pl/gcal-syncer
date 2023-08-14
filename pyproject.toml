@@ -4,13 +4,14 @@ version = "0.1.0"
 description = ""
 authors = ["sequencer <sequencer@o2.pl>"]
 readme = "README.md"
-packages = [{include = "gcal_syncer"}]
+packages = [{include = "syncer"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
 google-api-python-client = "^2.96.0"
 google-auth-httplib2 = "^0.1.0"
 google-auth-oauthlib = "^1.0.0"
+click = "^8.1.6"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -23,3 +24,6 @@ freezegun = "^1.2.2"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+syncer = 'syncer.main:run'

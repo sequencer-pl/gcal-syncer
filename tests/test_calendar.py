@@ -70,7 +70,6 @@ class CalendarTest(TestCase):
         expected_event = Event(
             start=datetime.datetime(year=1955, month=11, day=5),
             end=datetime.datetime(year=1955, month=11, day=5),
-            status='confirmed'
         )
 
         events = self.calendar.get_calendar_items(calendar_id=self.calendar_id, days=3)
