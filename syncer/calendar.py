@@ -42,7 +42,7 @@ class Calendar:
                 token.write(creds.to_json())
         return creds
 
-    def get_calendar_items(self, calendar_id: str, days: int) -> list[Event]:
+    def get_items(self, calendar_id: str, days: int) -> list[Event]:
         service = build('calendar', 'v3', credentials=self.credentials)
         _from = datetime.today()
         _to = _from + timedelta(days=days)
@@ -56,6 +56,7 @@ class Calendar:
             orderBy='startTime'
         ).execute()
         return [Event(
+            item_id=e['id'],
             start=datetime.strptime(e['start'].get('date'), GOOGLE_CALENDAR_ALL_DAY_EVENT_DATE),
             end=datetime.strptime(e['end'].get('date'), GOOGLE_CALENDAR_ALL_DAY_EVENT_DATE),
         ) for e in self._get_all_day_events_only(events_result.get('items', []))]
@@ -64,7 +65,7 @@ class Calendar:
     def _get_all_day_events_only(events):
         return [e for e in events if e['start'].get('date') and e['end'].get('date')]
 
-    def add_calendar_items(self, calendar_id: str, items: set[Event], description) -> None:
+    def add_items(self, calendar_id: str, items: list[Event], description) -> None:
         service = build('calendar', 'v3', credentials=self.credentials)
         for item in items:
             event = {
@@ -77,3 +78,10 @@ class Calendar:
                 }
             }
             service.events().insert(calendarId=calendar_id, body=event).execute()  # pylint: disable=maybe-no-member
+
+    def delete_items(self, calendar_id: str, items: list[Event]) -> None:
+        service = build('calendar', 'v3', credentials=self.credentials)
+        for item in items:
+            service.events().delete(  # pylint: disable=maybe-no-member
+                calendarId=calendar_id, eventId=item.item_id
+            ).execute()

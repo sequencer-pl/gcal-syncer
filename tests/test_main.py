@@ -11,7 +11,7 @@ class MainTest(TestCase):
 
         sync('src_cal_id', 'dst_cal_id', True, 'Description', 13)
 
-        cal.get_calendar_items.assert_has_calls([
+        cal.get_items.assert_has_calls([
             call('src_cal_id', 13),
             call('dst_cal_id', 13),
         ])

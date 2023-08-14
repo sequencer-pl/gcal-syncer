@@ -13,6 +13,3 @@ lint:
 mypy:
 	poetry run mypy syncer
 
-.PHONY: run
-run:
-	poetry run syncer $()

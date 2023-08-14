@@ -1,6 +1,3 @@
-"""
-MODULE
-"""
 import click
 
 from syncer.calendar import Calendar
@@ -12,8 +9,8 @@ from syncer.helper import compare_events_lists
               help='A calendar identifier from data will be copied. Example: abc@group.calendar.google.com')
 @click.option('-d', '--destination_calendar_id', required=True,
               help='The identifier of a calendar to which data will be copied. Example: abc@group.calendar.google.com')
-@click.option('-a', '--all-day-only', is_flag=True,
-              help="For now, it's only a placeholder. It does not work.")
+@click.option('-a', '--all-day-only', is_flag=True, default=True,
+              help="At the moment it allows sync only all day events. This flag is always true.")
 @click.option('-e', '--events_description', default='Free time!',
               help='Description for added events')
 @click.option('-n', '--number_of_days_to_sync', type=int, default=365,
@@ -25,7 +22,7 @@ def run(
         events_description: str,
         number_of_days_to_sync: int
 ) -> None:
-    """SYNC"""
+    """Small description"""
     sync(source_calendar_id, destination_calendar_id, all_day_only, events_description, number_of_days_to_sync)
 
 
@@ -37,8 +34,9 @@ def sync(
         number_of_days_to_sync: int
 ):
     calendar = Calendar(scopes=['https://www.googleapis.com/auth/calendar.events'])
-    src_events = calendar.get_calendar_items(source_calendar_id, number_of_days_to_sync)
-    dst_events = calendar.get_calendar_items(destination_calendar_id, number_of_days_to_sync)
-    print(f'{all_day_only} {events_description}: {compare_events_lists(set(src_events), set(dst_events))}')
-    events_to_add, events_to_remove = compare_events_lists(set(src_events), set(dst_events))
-    calendar.add_calendar_items(destination_calendar_id, events_to_add, events_description)
+    src_events = calendar.get_items(source_calendar_id, number_of_days_to_sync)
+    dst_events = calendar.get_items(destination_calendar_id, number_of_days_to_sync)
+    events_to_add, events_to_remove = compare_events_lists(src_events, dst_events)
+    calendar.add_items(destination_calendar_id, events_to_add, events_description)
+    calendar.delete_items(destination_calendar_id, events_to_remove)
+    _ = all_day_only  # sync not only all day events
