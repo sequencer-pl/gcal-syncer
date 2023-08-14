@@ -6,7 +6,7 @@ import freezegun
 
 from syncer.calendar import Calendar
 from syncer.dataclasses.calendar import Event
-from syncer.formats import GOOGLE_CALENDAR_ALL_DAY_EVENT_DATE
+from syncer.formats import GOOGLE_CALENDAR_DATETIME_FORMAT
 
 
 class CalendarCredentialsTest(TestCase):
@@ -50,8 +50,8 @@ class CalendarTest(TestCase):
 
         m_events.list.assert_called_once_with(
             calendarId=self.calendar_id,
-            timeMin=start.strftime(GOOGLE_CALENDAR_ALL_DAY_EVENT_DATE),
-            timeMax=end.strftime(GOOGLE_CALENDAR_ALL_DAY_EVENT_DATE),
+            timeMin=start.strftime(GOOGLE_CALENDAR_DATETIME_FORMAT),
+            timeMax=end.strftime(GOOGLE_CALENDAR_DATETIME_FORMAT),
             maxResults=99999,
             singleEvents=True,
             orderBy='startTime',

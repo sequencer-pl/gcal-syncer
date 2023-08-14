@@ -8,7 +8,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
 from syncer.dataclasses.calendar import Event
-from syncer.formats import GOOGLE_CALENDAR_ALL_DAY_EVENT_DATE
+from syncer.formats import GOOGLE_CALENDAR_DATETIME_FORMAT, GOOGLE_CALENDAR_ALL_DAY_EVENT_DATE
 
 logger = logging.getLogger(__name__)
 
@@ -44,13 +44,13 @@ class Calendar:
 
     def get_calendar_items(self, calendar_id: str, days: int) -> list[Event]:
         service = build('calendar', 'v3', credentials=self.credentials)
-        _from = datetime.now()
+        _from = datetime.today()
         _to = _from + timedelta(days=days)
         logger.info('Getting upcoming events for the next %s days', days)
         events_result = service.events().list(  # pylint: disable=maybe-no-member
             calendarId=calendar_id,
-            timeMin=_from.strftime(GOOGLE_CALENDAR_ALL_DAY_EVENT_DATE),
-            timeMax=_to.strftime(GOOGLE_CALENDAR_ALL_DAY_EVENT_DATE),
+            timeMin=_from.strftime(GOOGLE_CALENDAR_DATETIME_FORMAT),
+            timeMax=_to.strftime(GOOGLE_CALENDAR_DATETIME_FORMAT),
             maxResults=99_999,
             singleEvents=True,
             orderBy='startTime'
@@ -64,7 +64,7 @@ class Calendar:
     def _get_all_day_events_only(events):
         return [e for e in events if e['start'].get('date') and e['end'].get('date')]
 
-    def add_calendar_items(self, calendar_id: str, items: list[Event], description) -> None:
+    def add_calendar_items(self, calendar_id: str, items: set[Event], description) -> None:
         service = build('calendar', 'v3', credentials=self.credentials)
         for item in items:
             event = {

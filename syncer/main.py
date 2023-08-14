@@ -8,15 +8,15 @@ from syncer.helper import compare_events_lists
 
 
 @click.command()
-@click.option('-s', '--source_calendar_id',
+@click.option('-s', '--source_calendar_id', required=True,
               help='A calendar identifier from data will be copied. Example: abc@group.calendar.google.com')
-@click.option('-d', '--destination_calendar_id',
+@click.option('-d', '--destination_calendar_id', required=True,
               help='The identifier of a calendar to which data will be copied. Example: abc@group.calendar.google.com')
 @click.option('-a', '--all-day-only', is_flag=True,
               help="For now, it's only a placeholder. It does not work.")
 @click.option('-e', '--events_description', default='Free time!',
               help='Description for added events')
-@click.option('-n', '--number_of_days_to_sync', type=int,
+@click.option('-n', '--number_of_days_to_sync', type=int, default=365,
               help='How many days from today do you want to synchronize')
 def run(
         source_calendar_id: str,
@@ -40,3 +40,5 @@ def sync(
     src_events = calendar.get_calendar_items(source_calendar_id, number_of_days_to_sync)
     dst_events = calendar.get_calendar_items(destination_calendar_id, number_of_days_to_sync)
     print(f'{all_day_only} {events_description}: {compare_events_lists(set(src_events), set(dst_events))}')
+    events_to_add, events_to_remove = compare_events_lists(set(src_events), set(dst_events))
+    calendar.add_calendar_items(destination_calendar_id, events_to_add, events_description)
