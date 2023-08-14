@@ -1,6 +1,6 @@
-import datetime
+from datetime import datetime, timedelta
 from unittest import TestCase
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, call
 
 import freezegun
 
@@ -24,6 +24,7 @@ class CalendarCredentialsTest(TestCase):
         m_credentials.from_authorized_user_file.assert_called_once_with('token.json', scopes)
 
 
+@patch("syncer.calendar.build")
 class CalendarTest(TestCase):
     @patch('syncer.calendar.Calendar.get_credentials')
     def setUp(self, _) -> None:
@@ -36,14 +37,13 @@ class CalendarTest(TestCase):
     def tearDown(self) -> None:
         pass
 
-    @patch("syncer.calendar.build")
     def test_get_calendar_items_executes_google_api_service_events_list_request(
             self, m_build
     ):
         m_events = m_build().events.return_value = MagicMock()
         sync_days = 300
-        start = datetime.datetime(year=1985, month=10, day=26, hour=1, minute=22)
-        end = start + datetime.timedelta(days=sync_days)
+        start = datetime(year=1985, month=10, day=26, hour=1, minute=22)
+        end = start + timedelta(days=sync_days)
 
         with freezegun.freeze_time(start):
             self.calendar.get_calendar_items('test@cal.id', sync_days)
@@ -57,7 +57,6 @@ class CalendarTest(TestCase):
             orderBy='startTime',
         )
 
-    @patch("syncer.calendar.build")
     def test_get_calendar_items_returns_list_of_events_objects(self, m_build):
         m_events = m_build().events.return_value = MagicMock()
         m_list = m_events.list.return_value = MagicMock()
@@ -68,15 +67,14 @@ class CalendarTest(TestCase):
         }
         m_list.execute.return_value = {'items': [event]}
         expected_event = Event(
-            start=datetime.datetime(year=1955, month=11, day=5),
-            end=datetime.datetime(year=1955, month=11, day=5),
+            start=datetime(year=1955, month=11, day=5),
+            end=datetime(year=1955, month=11, day=5),
         )
 
         events = self.calendar.get_calendar_items(calendar_id=self.calendar_id, days=3)
 
         self.assertListEqual(events, [expected_event])
 
-    @patch("syncer.calendar.build")
     def test_get_calendar_items_returns_all_day_events_only(self, m_build):
         m_events = m_build().events.return_value = MagicMock()
         m_list = m_events.list.return_value = MagicMock()
@@ -96,3 +94,36 @@ class CalendarTest(TestCase):
         events = self.calendar.get_calendar_items('', 2)
 
         self.assertListEqual(events, [expected_event])
+
+    def test_add_calendar_items_execute_events_insert_with_proper_params(self, m_build):
+        m_events = m_build().events.return_value = MagicMock()
+        events = [
+            Event(start=datetime(year=1985, month=10, day=26), end=datetime(year=1985, month=10, day=26)),
+            Event(start=datetime(year=1985, month=11, day=26), end=datetime(year=1985, month=12, day=26)),
+        ]
+        dst_cal_id = 'cal@id'
+
+        self.calendar.add_calendar_items(calendar_id=dst_cal_id, items=events, description='Description')
+
+        m_events.insert.assert_has_calls([
+            call(calendarId=dst_cal_id, body={
+                'summary': 'Description',
+                'start': {
+                    'date': '1985-10-26'
+                },
+                'end': {
+                    'date': '1985-10-26'
+                }
+            }),
+            call().execute(),
+            call(calendarId=dst_cal_id, body={
+                'summary': 'Description',
+                'start': {
+                    'date': '1985-11-26'
+                },
+                'end': {
+                    'date': '1985-12-26'
+                }
+            }),
+            call().execute()
+        ])

@@ -14,7 +14,7 @@ from syncer.helper import compare_events_lists
               help='The identifier of a calendar to which data will be copied. Example: abc@group.calendar.google.com')
 @click.option('-a', '--all-day-only', is_flag=True,
               help="For now, it's only a placeholder. It does not work.")
-@click.option('-e', '--events_description',
+@click.option('-e', '--events_description', default='Free time!',
               help='Description for added events')
 @click.option('-n', '--number_of_days_to_sync', type=int,
               help='How many days from today do you want to synchronize')

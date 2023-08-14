@@ -1,6 +1,3 @@
-"""
-    Module for Google calendar
-"""
 import logging
 import os.path
 from datetime import datetime, timedelta
@@ -17,8 +14,6 @@ logger = logging.getLogger(__name__)
 
 
 class Calendar:
-    """Google calendar class
-    """
     def __init__(self, scopes):
         self.scopes = scopes
         self.credentials = self.get_credentials()
@@ -68,3 +63,17 @@ class Calendar:
     @staticmethod
     def _get_all_day_events_only(events):
         return [e for e in events if e['start'].get('date') and e['end'].get('date')]
+
+    def add_calendar_items(self, calendar_id: str, items: list[Event], description) -> None:
+        service = build('calendar', 'v3', credentials=self.credentials)
+        for item in items:
+            event = {
+                'summary': description,
+                'start': {
+                    'date': item.start.strftime(GOOGLE_CALENDAR_ALL_DAY_EVENT_DATE)
+                },
+                'end': {
+                    'date': item.end.strftime(GOOGLE_CALENDAR_ALL_DAY_EVENT_DATE)
+                }
+            }
+            service.events().insert(calendarId=calendar_id, body=event).execute()  # pylint: disable=maybe-no-member
