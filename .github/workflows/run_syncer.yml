@@ -22,4 +22,4 @@ jobs:
     - name: Run syncer
       run: |
         poetry run syncer -s ${{ secrets.SRC_CALENDAR }} -d ${{ secrets.DST_CALENDAR }} \
-        -n ${{ github.event.inputs.number_of_days_to_sync }} -t ${{ secrets.TOKEN_JSON }}
+        -n ${{ github.event.inputs.number_of_days_to_sync }} -t '${{ secrets.TOKEN_JSON }}'
