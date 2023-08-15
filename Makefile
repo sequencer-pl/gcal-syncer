@@ -13,3 +13,6 @@ lint:
 mypy:
 	poetry run mypy syncer
 
+.PHONY: install
+install:
+	pip install poetry && poetry install

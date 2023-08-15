@@ -31,7 +31,9 @@ def run(
         number_of_days_to_sync: int,
         token_json: str
 ) -> None:
-    """Small description"""
+    """
+    A script for copying full-day events (in a recent version) from one google calendar to another
+    """
     logging_setup()
     token_data = json.loads(token_json)
     sync(
