@@ -1,3 +1,4 @@
+import json
 import logging
 
 import click
@@ -20,16 +21,26 @@ logger = logging.getLogger(__name__)
               help='Description for added events')
 @click.option('-n', '--number_of_days_to_sync', type=int, default=365,
               help='How many days from today do you want to synchronize')
+@click.option('-t', '--token_json', default='{}',
+              help='Token json content. Paste it in apostrophes, E.g. \'{"token": "Lorem..."}...\'')
 def run(
         source_calendar_id: str,
         destination_calendar_id: str,
         all_day_only: bool,
         events_description: str,
-        number_of_days_to_sync: int
+        number_of_days_to_sync: int,
+        token_json: str
 ) -> None:
     """Small description"""
     logging_setup()
-    sync(source_calendar_id, destination_calendar_id, all_day_only, events_description, number_of_days_to_sync)
+    token_data = json.loads(token_json)
+    sync(
+        source_calendar_id,
+        destination_calendar_id,
+        all_day_only, events_description,
+        number_of_days_to_sync,
+        token_data
+    )
 
 
 def sync(
@@ -37,9 +48,10 @@ def sync(
         destination_calendar_id: str,
         all_day_only: bool,
         events_description: str,
-        number_of_days_to_sync: int
+        number_of_days_to_sync: int,
+        token_data: str
 ):
-    calendar = Calendar(scopes=['https://www.googleapis.com/auth/calendar.events'])
+    calendar = Calendar(scopes=['https://www.googleapis.com/auth/calendar.events'], token_data=token_data)
     src_events = calendar.get_items(source_calendar_id, number_of_days_to_sync)
     dst_events = calendar.get_items(destination_calendar_id, number_of_days_to_sync)
     events_to_add, events_to_remove = compare_events_lists(src_events, dst_events)
