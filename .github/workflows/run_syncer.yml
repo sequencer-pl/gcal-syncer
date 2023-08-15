@@ -1,0 +1,25 @@
+name: Run syncer
+
+on:
+  workflow_dispatch:
+    inputs:
+      number_of_days_to_sync:
+        description: Number of days from now to be synchronized
+        required: false
+        default: 365
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3
+      uses: actions/setup-python@v3
+    - name: Install Poetry
+      run: pip install poetry
+    - name: Install dependencies
+      run: poetry install
+    - name: Run syncer
+      run: |
+        poetry run syncer -s ${{ secrets.SRC_CALENDAR }} -d ${{ secrets.DST_CALENDAR }} \
+        -n ${{ github.event.inputs.number_of_days_to_sync }} -t ${{ secrets.TOKEN_JSON }}
