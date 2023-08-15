@@ -9,7 +9,7 @@ class MainTest(TestCase):
     def test_sync_executes_get_and_compare_events(self, m_calendar):
         cal = m_calendar()
 
-        sync('src_cal_id', 'dst_cal_id', True, 'Description', 13)
+        sync('src_cal_id', 'dst_cal_id', True, 'Description', 13, token_data={})
 
         cal.get_items.assert_has_calls([
             call('src_cal_id', 13),

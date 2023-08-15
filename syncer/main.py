@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
               help='How many days from today do you want to synchronize')
 @click.option('-t', '--token_json', default='{}',
               help='Token json content. Paste it in apostrophes, E.g. \'{"token": "Lorem..."}...\'')
-def run(
+def run(  # pylint: disable=too-many-arguments
         source_calendar_id: str,
         destination_calendar_id: str,
         all_day_only: bool,
@@ -45,13 +45,13 @@ def run(
     )
 
 
-def sync(
+def sync(  # pylint: disable=too-many-arguments
         source_calendar_id: str,
         destination_calendar_id: str,
         all_day_only: bool,
         events_description: str,
         number_of_days_to_sync: int,
-        token_data: str
+        token_data: dict
 ):
     calendar = Calendar(scopes=['https://www.googleapis.com/auth/calendar.events'], token_data=token_data)
     src_events = calendar.get_items(source_calendar_id, number_of_days_to_sync)
