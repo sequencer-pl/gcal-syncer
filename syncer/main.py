@@ -1,7 +1,12 @@
+import logging
+
 import click
 
 from syncer.calendar import Calendar
 from syncer.helper import compare_events_lists
+from syncer.logger import logging_setup
+
+logger = logging.getLogger(__name__)
 
 
 @click.command()
@@ -23,6 +28,7 @@ def run(
         number_of_days_to_sync: int
 ) -> None:
     """Small description"""
+    logging_setup()
     sync(source_calendar_id, destination_calendar_id, all_day_only, events_description, number_of_days_to_sync)
 
 
@@ -37,6 +43,9 @@ def sync(
     src_events = calendar.get_items(source_calendar_id, number_of_days_to_sync)
     dst_events = calendar.get_items(destination_calendar_id, number_of_days_to_sync)
     events_to_add, events_to_remove = compare_events_lists(src_events, dst_events)
-    calendar.add_items(destination_calendar_id, events_to_add, events_description)
+    logger.info("Events to remove: %s", events_to_remove)
     calendar.delete_items(destination_calendar_id, events_to_remove)
+    logger.info("Events to add: %s", events_to_add)
+    calendar.add_items(destination_calendar_id, events_to_add, events_description)
+    logger.info("%s days synced successfully", number_of_days_to_sync)
     _ = all_day_only  # sync not only all day events
