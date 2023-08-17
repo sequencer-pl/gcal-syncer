@@ -5,11 +5,15 @@ on:
     inputs:
       number_of_days_to_sync:
         description: Number of days from now to be synchronized
-        required: false
+        required: true
         default: 365
+      event_description:
+        description: Summary / description for new added events
+        required: true
+        default: Wolne!
 
 jobs:
-  build:
+  run:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -22,4 +26,5 @@ jobs:
     - name: Run syncer
       run: |
         poetry run syncer -s ${{ secrets.SRC_CALENDAR }} -d ${{ secrets.DST_CALENDAR }} \
-        -n ${{ github.event.inputs.number_of_days_to_sync }} -t ${{ secrets.TOKEN_JSON }}
+        -n ${{ github.event.inputs.number_of_days_to_sync }} -e ${{ github.event.inputs.event_description }} \
+        -t '${{ secrets.TOKEN_JSON }}'
