@@ -1,0 +1,21 @@
+name: Cron syncer
+
+on:
+  schedule:
+    cron: '0 18 * * 1-5'
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3
+      uses: actions/setup-python@v3
+    - name: Install Poetry
+      run: pip install poetry
+    - name: Install dependencies
+      run: poetry install
+    - name: Run syncer
+      run: |
+        poetry run syncer -s ${{ secrets.SRC_CALENDAR }} -d ${{ secrets.DST_CALENDAR }} \
+        -n 365 -e 'Wolne!' -t '${{ secrets.TOKEN_JSON }}'
